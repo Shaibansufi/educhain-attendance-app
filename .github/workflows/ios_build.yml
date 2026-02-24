@@ -32,7 +32,6 @@ jobs:
         run: |
           curl -L https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_3.13.6-stable.zip -o flutter.zip
           unzip flutter.zip -d $HOME
-          mv $HOME/flutter $HOME/flutter
         shell: bash
 
       # 4️⃣ Add Flutter to PATH
@@ -45,7 +44,7 @@ jobs:
           flutter --version
           dart --version
 
-      # 6️⃣ Disable analytics
+      # 6️⃣ Disable Flutter Analytics
       - name: Disable Flutter Analytics
         run: flutter config --no-analytics
 
