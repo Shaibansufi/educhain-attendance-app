@@ -18,13 +18,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Install Flutter manually (3.13.6 with Dart 3.11+)
+      # 2️⃣ Install Flutter 3.13.6 manually
       - name: Install Flutter 3.13.6
         run: |
           curl -L https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_3.13.6-stable.zip -o flutter.zip
           unzip flutter.zip -d $HOME
           echo "$HOME/flutter/bin" >> $GITHUB_PATH
-        shell: bash
 
       # 3️⃣ Verify Flutter & Dart versions
       - name: Flutter & Dart version
@@ -36,32 +35,21 @@ jobs:
       - name: Disable Flutter Analytics
         run: flutter config --no-analytics
 
-      # 5️⃣ Cache Flutter dependencies
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.pub-cache
-            decentralized_attendance/.dart_tool
-          key: flutter-deps-${{ hashFiles('decentralized_attendance/pubspec.yaml') }}
-          restore-keys: |
-            flutter-deps-
-
-      # 6️⃣ Install project dependencies
+      # 5️⃣ Install project dependencies
       - name: Flutter pub get
         run: flutter pub get
 
-      # 7️⃣ Build iOS release (no codesign)
+      # 6️⃣ Build iOS release (no code signing)
       - name: Build iOS
         run: flutter build ios --release --no-codesign
 
-      # 8️⃣ Package Runner.app as zip
+      # 7️⃣ Package Runner.app as zip
       - name: Package Runner.app
         run: |
           cd build/ios/iphoneos
           zip -r ../../ios-build.zip Runner.app
 
-      # 9️⃣ Create .ipa from Runner.app
+      # 8️⃣ Create .ipa from Runner.app
       - name: Package .ipa
         run: |
           mkdir -p Payload
@@ -69,7 +57,7 @@ jobs:
           zip -r ios-build.ipa Payload
           rm -rf Payload
 
-      # 🔟 Upload artifacts
+      # 9️⃣ Upload artifacts
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
