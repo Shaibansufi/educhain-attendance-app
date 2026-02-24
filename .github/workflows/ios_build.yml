@@ -18,22 +18,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2️⃣ Setup Flutter 3.13.6 manually
-      - name: Setup Flutter 3.13.6
-        run: |
-          echo "Downloading Flutter 3.13.6..."
-          curl -L https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_3.13.6-stable.zip -o flutter.zip
-          unzip flutter.zip
-          echo "$PWD/flutter/bin" >> $GITHUB_PATH
-          echo "Flutter path added: $PWD/flutter/bin"
+      # 2️⃣ Setup Flutter 3.13.6 (comes with Dart 3.11+)
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.13.6
+          channel: stable
 
-      # 3️⃣ Verify Flutter and Dart versions
+      # 3️⃣ Verify Flutter & Dart versions
       - name: Flutter and Dart versions
         run: |
           flutter --version
           dart --version
 
-      # 4️⃣ Cache Flutter dependencies for speed
+      # 4️⃣ Cache Flutter dependencies
       - name: Cache Flutter dependencies
         uses: actions/cache@v3
         with:
@@ -48,7 +46,7 @@ jobs:
       - name: Get Flutter dependencies
         run: flutter pub get
 
-      # 6️⃣ Build iOS release (no code signing)
+      # 6️⃣ Build iOS release (no codesign)
       - name: Build iOS
         run: flutter build ios --release --no-codesign
 
@@ -66,7 +64,7 @@ jobs:
           zip -r ios-build.ipa Payload
           rm -rf Payload
 
-      # 9️⃣ Upload Runner.app and .ipa as artifacts
+      # 9️⃣ Upload artifacts
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
