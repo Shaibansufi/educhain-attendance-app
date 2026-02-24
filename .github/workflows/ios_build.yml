@@ -18,7 +18,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Install Flutter 3.13.6 manually
+      # 2️⃣ Install Flutter 3.13.6 manually (includes Dart 3.11+)
       - name: Install Flutter 3.13.6
         run: |
           curl -L https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_3.13.6-stable.zip -o flutter.zip
@@ -35,11 +35,11 @@ jobs:
       - name: Disable Flutter Analytics
         run: flutter config --no-analytics
 
-      # 5️⃣ Install project dependencies
+      # 5️⃣ Get project dependencies
       - name: Flutter pub get
         run: flutter pub get
 
-      # 6️⃣ Build iOS release (no code signing)
+      # 6️⃣ Build iOS release (no codesign)
       - name: Build iOS
         run: flutter build ios --release --no-codesign
 
