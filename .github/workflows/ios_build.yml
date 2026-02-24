@@ -14,27 +14,39 @@ jobs:
         working-directory: decentralized_attendance
 
     steps:
+      # 1️⃣ Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Flutter
+      # 2️⃣ Force install Flutter 3.13.6 (includes Dart 3.11+)
+      - name: Setup Flutter (force latest stable)
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.13.6"
-          channel: "stable"
-          cache: false   # force latest Flutter with correct Dart
+          flutter-version: 3.13.6
+          channel: stable
+          cache: false   # important! disables using preinstalled Flutter
 
-      - name: Install dependencies
+      # 3️⃣ Verify Flutter & Dart versions
+      - name: Flutter and Dart version
+        run: |
+          flutter --version
+          dart --version
+
+      # 4️⃣ Install dependencies
+      - name: Get dependencies
         run: flutter pub get
 
+      # 5️⃣ Build iOS (no code signing)
       - name: Build iOS
         run: flutter build ios --release --no-codesign
 
-      - name: Package Runner.app as zip
+      # 6️⃣ Package Runner.app as zip
+      - name: Package Runner.app
         run: |
           cd build/ios/iphoneos
           zip -r ../../ios-build.zip Runner.app
 
+      # 7️⃣ Upload iOS build artifact
       - name: Upload iOS build artifact
         uses: actions/upload-artifact@v4
         with:
