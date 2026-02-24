@@ -14,35 +14,63 @@ jobs:
         working-directory: decentralized_attendance
 
     steps:
+      # 1️⃣ Checkout repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Download Flutter 3.13.6 manually
-      - name: Download Flutter SDK
+      # 2️⃣ Setup Flutter 3.13.6 manually
+      - name: Setup Flutter 3.13.6
         run: |
+          echo "Downloading Flutter 3.13.6..."
           curl -L https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_3.13.6-stable.zip -o flutter.zip
           unzip flutter.zip
-          export PATH="$PWD/flutter/bin:$PATH"
+          echo "$PWD/flutter/bin" >> $GITHUB_PATH
+          echo "Flutter path added: $PWD/flutter/bin"
+
+      # 3️⃣ Verify Flutter and Dart versions
+      - name: Flutter and Dart versions
+        run: |
           flutter --version
           dart --version
 
-      # Get dependencies
-      - name: Get dependencies
+      # 4️⃣ Cache Flutter dependencies for speed
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+            decentralized_attendance/.dart_tool
+          key: flutter-deps-${{ hashFiles('decentralized_attendance/pubspec.yaml') }}
+          restore-keys: |
+            flutter-deps-
+
+      # 5️⃣ Install dependencies
+      - name: Get Flutter dependencies
         run: flutter pub get
 
-      # Build iOS
+      # 6️⃣ Build iOS release (no code signing)
       - name: Build iOS
         run: flutter build ios --release --no-codesign
 
-      # Package Runner.app
+      # 7️⃣ Package Runner.app as zip
       - name: Package Runner.app
         run: |
           cd build/ios/iphoneos
           zip -r ../../ios-build.zip Runner.app
 
-      # Upload artifact
-      - name: Upload iOS artifact
+      # 8️⃣ Create .ipa from Runner.app
+      - name: Package .ipa
+        run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -r ios-build.ipa Payload
+          rm -rf Payload
+
+      # 9️⃣ Upload Runner.app and .ipa as artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ios-build
-          path: build/ios/ios-build.zip
+          path: |
+            build/ios/ios-build.zip
+            build/ios/ios-build.ipa
