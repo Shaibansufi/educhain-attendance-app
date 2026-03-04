@@ -1,0 +1,94 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract EduChainSimple {
+
+    // =====================================================
+    // STRUCT
+    // =====================================================
+
+    struct User {
+        string prn;
+        string mobile;
+        string name;
+        string role;
+        string department;
+        string college;
+        bool exists;
+    }
+
+    // =====================================================
+    // STORAGE
+    // =====================================================
+
+    mapping(string => User) private usersByPRN;
+    mapping(string => string) private prnByMobile;
+    mapping(string => uint256[]) private attendanceRecords;
+
+    // =====================================================
+    // REGISTER USER
+    // =====================================================
+
+    function registerUser(
+        string memory _prn,
+        string memory _mobile,
+        string memory _name,
+        string memory _role,
+        string memory _department,
+        string memory _college
+    ) public {
+
+        require(!usersByPRN[_prn].exists, "User already registered");
+        require(bytes(prnByMobile[_mobile]).length == 0, "Mobile already registered");
+
+        usersByPRN[_prn] = User(
+            _prn,
+            _mobile,
+            _name,
+            _role,
+            _department,
+            _college,
+            true
+        );
+
+        prnByMobile[_mobile] = _prn;
+    }
+
+    // =====================================================
+    // LOGIN (Returns ONLY PRN - matches Flutter)
+    // =====================================================
+
+    function loginByMobile(string memory _mobile)
+        public
+        view
+        returns (string memory)
+    {
+        string memory prn = prnByMobile[_mobile];
+        require(bytes(prn).length != 0, "Mobile not registered");
+
+        return prn;
+    }
+
+    // =====================================================
+    // MARK ATTENDANCE
+    // =====================================================
+
+    function markAttendance(string memory _prn) public {
+        require(usersByPRN[_prn].exists, "User not registered");
+
+        attendanceRecords[_prn].push(block.timestamp);
+    }
+
+    // =====================================================
+    // VIEW ATTENDANCE
+    // =====================================================
+
+    function getAttendance(string memory _prn)
+        public
+        view
+        returns (uint256[] memory)
+    {
+        require(usersByPRN[_prn].exists, "User not registered");
+        return attendanceRecords[_prn];
+    }
+}
