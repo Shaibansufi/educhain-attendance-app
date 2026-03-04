@@ -1,282 +1,14 @@
-// import 'package:flutter/material.dart';
-// import '../services/biometric_service.dart';
-// import '../services/blockchain_service.dart';
-
-// class RegisterScreen extends StatefulWidget {
-//   const RegisterScreen({Key? key}) : super(key: key);
-
-//   @override
-//   State<RegisterScreen> createState() => _RegisterScreenState();
-// }
-
-// class _RegisterScreenState extends State<RegisterScreen> {
-//   final _formKey = GlobalKey<FormState>();
-
-//   final TextEditingController _idController = TextEditingController();
-//   final TextEditingController _mobileController = TextEditingController();
-//   final TextEditingController _nameController = TextEditingController();
-//   final TextEditingController _departmentController = TextEditingController();
-//   final TextEditingController _collegeController = TextEditingController();
-
-//   String _selectedRole = "Student";
-//   bool _isLoading = false;
-
-//   final Color primaryBrown = const Color(0xFF6D4C41);
-//   final Color accentOrange = const Color(0xFFFFA726);
-
-//   @override
-//   void dispose() {
-//     _idController.dispose();
-//     _mobileController.dispose();
-//     _nameController.dispose();
-//     _departmentController.dispose();
-//     _collegeController.dispose();
-//     super.dispose();
-//   }
-
-//   InputDecoration _inputDecoration(String label) {
-//     return InputDecoration(
-//       labelText: label,
-//       filled: true,
-//       fillColor: Colors.white.withOpacity(0.95),
-//       contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-//       border: OutlineInputBorder(
-//         borderRadius: BorderRadius.circular(16),
-//         borderSide: BorderSide.none,
-//       ),
-//       focusedBorder: OutlineInputBorder(
-//         borderRadius: BorderRadius.circular(16),
-//         borderSide: BorderSide(color: accentOrange, width: 2),
-//       ),
-//     );
-//   }
-
-//   Future<void> _registerUser() async {
-//     if (!_formKey.currentState!.validate()) return;
-
-//     setState(() => _isLoading = true);
-
-//     try {
-//       bool isAuthenticated = await BiometricService().authenticate();
-
-//       if (!isAuthenticated) {
-//         ScaffoldMessenger.of(context).showSnackBar(
-//           const SnackBar(content: Text("Biometric Authentication Failed")),
-//         );
-//         setState(() => _isLoading = false);
-//         return;
-//       }
-
-//       String hash = BlockchainService().generateBiometricHash(
-//         _idController.text.trim(),
-//         _mobileController.text.trim(),
-//       );
-
-//       print("Generated Hash: $hash");
-
-//       ScaffoldMessenger.of(
-//         context,
-//       ).showSnackBar(const SnackBar(content: Text("Registration Successful")));
-
-//       _formKey.currentState!.reset();
-//     } catch (e) {
-//       ScaffoldMessenger.of(
-//         context,
-//       ).showSnackBar(SnackBar(content: Text("Error: $e")));
-//     }
-
-//     setState(() => _isLoading = false);
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: SizedBox.expand(
-//         child: Stack(
-//           children: [
-//             /// Background Image
-//             Positioned.fill(
-//               child: Image.asset(
-//                 "assets/images/university.png",
-//                 fit: BoxFit.cover,
-//               ),
-//             ),
-
-//             /// White Fade Overlay
-//             Positioned.fill(
-//               child: Container(color: Colors.white.withOpacity(0.90)),
-//             ),
-
-//             /// Content
-//             SingleChildScrollView(
-//               child: ConstrainedBox(
-//                 constraints: BoxConstraints(
-//                   minHeight: MediaQuery.of(context).size.height,
-//                 ),
-//                 child: IntrinsicHeight(
-//                   child: Column(
-//                     mainAxisAlignment: MainAxisAlignment.center,
-//                     children: [
-//                       /// 🔵 Rounded Logo (Like Login)
-//                       Container(
-//                         decoration: BoxDecoration(
-//                           shape: BoxShape.circle,
-//                           boxShadow: [
-//                             BoxShadow(
-//                               color: accentOrange.withOpacity(0.3),
-//                               blurRadius: 25,
-//                               spreadRadius: 4,
-//                             ),
-//                           ],
-//                         ),
-//                         child: const CircleAvatar(
-//                           radius: 55,
-//                           backgroundImage: AssetImage(
-//                             "assets/images/blockchain.png",
-//                           ),
-//                           backgroundColor: Colors.white,
-//                         ),
-//                       ),
-
-//                       const SizedBox(height: 20),
-
-//                       const Text(
-//                         "EduChain Registration",
-//                         style: TextStyle(
-//                           fontSize: 26,
-//                           fontWeight: FontWeight.bold,
-//                         ),
-//                       ),
-
-//                       const SizedBox(height: 30),
-
-//                       Padding(
-//                         padding: const EdgeInsets.symmetric(horizontal: 24),
-//                         child: Container(
-//                           padding: const EdgeInsets.all(22),
-//                           decoration: BoxDecoration(
-//                             color: Colors.white.withOpacity(0.95),
-//                             borderRadius: BorderRadius.circular(24),
-//                             boxShadow: [
-//                               BoxShadow(
-//                                 color: Colors.black.withOpacity(0.12),
-//                                 blurRadius: 30,
-//                                 offset: const Offset(0, 15),
-//                               ),
-//                             ],
-//                           ),
-//                           child: Form(
-//                             key: _formKey,
-//                             child: Column(
-//                               children: [
-//                                 DropdownButtonFormField<String>(
-//                                   value: _selectedRole,
-//                                   decoration: _inputDecoration("Select Role"),
-//                                   items: ["Student", "Teacher"]
-//                                       .map(
-//                                         (role) => DropdownMenuItem(
-//                                           value: role,
-//                                           child: Text(role),
-//                                         ),
-//                                       )
-//                                       .toList(),
-//                                   onChanged: (value) =>
-//                                       setState(() => _selectedRole = value!),
-//                                 ),
-
-//                                 const SizedBox(height: 18),
-
-//                                 TextFormField(
-//                                   controller: _idController,
-//                                   decoration: _inputDecoration(
-//                                     _selectedRole == "Student"
-//                                         ? "PRN Number"
-//                                         : "Employee ID",
-//                                   ),
-//                                 ),
-
-//                                 const SizedBox(height: 18),
-
-//                                 TextFormField(
-//                                   controller: _mobileController,
-//                                   keyboardType: TextInputType.phone,
-//                                   decoration: _inputDecoration("Mobile Number"),
-//                                 ),
-
-//                                 const SizedBox(height: 18),
-
-//                                 TextFormField(
-//                                   controller: _nameController,
-//                                   decoration: _inputDecoration("Full Name"),
-//                                 ),
-
-//                                 const SizedBox(height: 18),
-
-//                                 TextFormField(
-//                                   controller: _departmentController,
-//                                   decoration: _inputDecoration("Department"),
-//                                 ),
-
-//                                 const SizedBox(height: 18),
-
-//                                 TextFormField(
-//                                   controller: _collegeController,
-//                                   decoration: _inputDecoration("College Name"),
-//                                 ),
-
-//                                 const SizedBox(height: 30),
-
-//                                 GestureDetector(
-//                                   onTap: _isLoading ? null : _registerUser,
-//                                   child: Container(
-//                                     height: 55,
-//                                     width: double.infinity,
-//                                     decoration: BoxDecoration(
-//                                       gradient: LinearGradient(
-//                                         colors: [accentOrange, primaryBrown],
-//                                       ),
-//                                       borderRadius: BorderRadius.circular(16),
-//                                     ),
-//                                     alignment: Alignment.center,
-//                                     child: _isLoading
-//                                         ? const CircularProgressIndicator(
-//                                             color: Colors.white,
-//                                           )
-//                                         : const Text(
-//                                             "Register with Biometric",
-//                                             style: TextStyle(
-//                                               color: Colors.white,
-//                                               fontSize: 16,
-//                                               fontWeight: FontWeight.bold,
-//                                             ),
-//                                           ),
-//                                   ),
-//                                 ),
-//                               ],
-//                             ),
-//                           ),
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../services/biometric_service.dart';
 import '../services/blockchain_service.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  final BlockchainService blockchainService; //
+  const RegisterScreen({Key? key, required this.blockchainService})
+    : super(key: key);
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -285,7 +17,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _idController = TextEditingController();
+  final TextEditingController _prnController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _departmentController = TextEditingController();
@@ -299,7 +31,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
-    _idController.dispose();
+    _prnController.dispose();
     _mobileController.dispose();
     _nameController.dispose();
     _departmentController.dispose();
@@ -352,34 +84,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isLoading = true);
 
     try {
+      /// Step 1: Biometric Authentication
       bool isAuthenticated = await BiometricService().authenticate();
-
       if (!isAuthenticated) {
         _showMessage("Biometric Authentication Failed");
         setState(() => _isLoading = false);
         return;
       }
 
-      String hash = BlockchainService().generateBiometricHash(
-        _idController.text.trim(),
-        _mobileController.text.trim(),
+      /// Step 2: Blockchain Registration
+      await widget.blockchainService.registerUser(
+        prn: _prnController.text.trim(),
+        mobile: _mobileController.text.trim(),
+        name: _nameController.text.trim(),
+        role: _selectedRole,
+        department: _departmentController.text.trim(),
+        college: _collegeController.text.trim(),
+      );
+      print("Registering mobile: '${_mobileController.text.trim()}'");
+      _showMessage("Registration Successful! ✅");
+
+      /// Step 3: Navigate to Login
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              LoginScreen(blockchainService: widget.blockchainService),
+        ),
       );
 
-      print("Generated Hash: $hash");
-
-      _showMessage("Registration Successful");
-
       _formKey.currentState!.reset();
-      _idController.clear();
+      _prnController.clear();
       _mobileController.clear();
       _nameController.clear();
       _departmentController.clear();
       _collegeController.clear();
     } catch (e) {
-      _showMessage("Error: $e");
+      String errorMessage = e.toString();
+
+      // Handle common blockchain errors nicely
+      if (errorMessage.contains("User already registered")) {
+        _showMessage("PRN / Employee ID already registered ❌");
+      } else if (errorMessage.contains("Mobile already registered")) {
+        _showMessage("Mobile number already registered ❌");
+      } else if (errorMessage.contains("value out of range")) {
+        _showMessage(
+          "Blockchain decoding error. Please restart app and try again.",
+        );
+      } else {
+        _showMessage("Registration Failed ❌\n$errorMessage");
+      }
     }
 
     setState(() => _isLoading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Platform.isIOS
+        ? CupertinoPageScaffold(child: _buildBody())
+        : Scaffold(body: _buildBody());
   }
 
   Widget _buildBody() {
@@ -391,6 +155,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: IntrinsicHeight(
           child: Stack(
             children: [
+              /// Background
               Positioned.fill(
                 child: Image.asset(
                   "assets/images/university.png",
@@ -400,9 +165,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Positioned.fill(
                 child: Container(color: Colors.white.withOpacity(0.90)),
               ),
+
+              /// Form Content
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  /// Blockchain Logo
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -428,6 +196,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 30),
+
+                  /// Registration Form Card
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Container(
@@ -447,8 +217,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         key: _formKey,
                         child: Column(
                           children: [
+                            /// Role
                             DropdownButtonFormField<String>(
-                              value: _selectedRole,
+                              initialValue: _selectedRole,
                               decoration: _inputDecoration("Select Role"),
                               items: ["Student", "Teacher"]
                                   .map(
@@ -462,8 +233,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   setState(() => _selectedRole = value!),
                             ),
                             const SizedBox(height: 18),
+
+                            /// PRN / Employee ID
                             TextFormField(
-                              controller: _idController,
+                              controller: _prnController,
                               decoration: _inputDecoration(
                                 _selectedRole == "Student"
                                     ? "PRN Number"
@@ -475,6 +248,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   : null,
                             ),
                             const SizedBox(height: 18),
+
+                            /// Mobile
                             TextFormField(
                               controller: _mobileController,
                               keyboardType: TextInputType.phone,
@@ -485,6 +260,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   : null,
                             ),
                             const SizedBox(height: 18),
+
+                            /// Name
                             TextFormField(
                               controller: _nameController,
                               decoration: _inputDecoration("Full Name"),
@@ -494,16 +271,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   : null,
                             ),
                             const SizedBox(height: 18),
+
+                            /// Department
                             TextFormField(
                               controller: _departmentController,
                               decoration: _inputDecoration("Department"),
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? "Enter Department"
+                                  : null,
                             ),
                             const SizedBox(height: 18),
+
+                            /// College
                             TextFormField(
                               controller: _collegeController,
                               decoration: _inputDecoration("College Name"),
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? "Enter College Name"
+                                  : null,
                             ),
                             const SizedBox(height: 30),
+
+                            /// Register Button
                             GestureDetector(
                               onTap: _isLoading ? null : _registerUser,
                               child: Container(
@@ -542,12 +333,5 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Platform.isIOS
-        ? CupertinoPageScaffold(child: _buildBody())
-        : Scaffold(body: _buildBody());
   }
 }

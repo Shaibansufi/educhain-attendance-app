@@ -70,6 +70,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/educhain_abi.json
     - assets/images/university.png
     - assets/images/blockchain.png
 
